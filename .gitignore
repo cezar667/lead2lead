@@ -1,0 +1,47 @@
+# --- Python / venv ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+
+# --- IDE / SO ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Dados locais grandes / temporários ---
+data/
+scripts/**/parquet/
+**/*.parquet
+**/*.duckdb
+**/*.duckdb.wal
+**/*.db
+**/tmp/
+tmp/
+logs/
+**/*.log
+
+# --- Exports gerados ---
+exports/
+out/
+**/*.csv
+**/*.xlsx
+
+# --- Credenciais / variáveis ---
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+
+# --- Cache de ferramentas ---
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/

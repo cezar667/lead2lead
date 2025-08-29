@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta de Empresas - CNPJ.ws</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #d0e7ff, #eaf2ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            color: #004c99;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select,
+        input[type="number"],
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #c6d4e1;
+            background-color: #f7faff;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            border-radius: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px;
+            font-size: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            transition: opacity 0.3s ease;
+            display: none;
+        }
+
+        #toast.error {
+            background-color: #cc0000;
+        }
+
+        .toggle-link {
+            color: #007bff;
+            font-size: 14px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Consulta de Empresas - CNPJ.ws</h2>
+        <form id="empresaForm">
+            <!-- Filtros Principais -->
+            <label for="estado_id">Estado (UF):</label>
+            <select name="estado_id" required>
+                <option value="31">Minas Gerais</option>
+                <option value="35">São Paulo</option>
+                <option value="33">Rio de Janeiro</option>
+            </select>
+
+            <label for="natureza_juridica_id">Natureza Jurídica:</label>
+            <select name="natureza_juridica_id" required>
+                <option value="2135">MEI (Empresário Individual)</option>
+                <option value="2062">Sociedade LTDA</option>
+                <option value="2038">Empresário (Individual)</option>
+            </select>
+
+            <label for="situacao_cadastral">Situação Cadastral:</label>
+            <select name="situacao_cadastral" required>
+                <option value="Ativa">Ativa</option>
+                <option value="Inapta">Inapta</option>
+                <option value="Baixada">Baixada</option>
+            </select>
+
+            <label for="max_paginas">Nº Máximo de Páginas:</label>
+            <input type="number" name="max_paginas" value="10" min="1" max="100" required />
+
+            <span class="toggle-link" onclick="toggleExtra()">+ Filtros Avançados</span>
+
+            <!-- Filtros Extras -->
+            <div id="filtrosExtras" class="hidden">
+                <label for="data_inicio_atividade_de">Data Abertura (De):</label>
+                <input type="date" name="data_inicio_atividade_de">
+
+                <label for="data_inicio_atividade_ate">Data Abertura (Até):</label>
+                <input type="date" name="data_inicio_atividade_ate">
+
+                <label for="porte_id">Porte da Empresa:</label>
+                <select name="porte_id">
+                    <option value="">-- Todos --</option>
+                    <option value="1">ME</option>
+                    <option value="2">EPP</option>
+                    <option value="3">Médio</option>
+                    <option value="5">Grande</option>
+                </select>
+
+                <label for="municipio_id">Município (IBGE):</label>
+                <select name="municipio_id">
+                    <option value="">-- Todos --</option>
+                    <option value="3106200">Belo Horizonte</option>
+                    <option value="3170206">Uberlândia</option>
+                    <option value="3168606">Sete Lagoas</option>
+                </select>
+
+                <label for="cnae_secundario_id">CNAE Secundário:</label>
+                <input type="text" name="cnae_secundario_id" placeholder="Ex: 6202300">
+            </div>
+            <label style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" name="modo" value="simulado">
+                Usar dados simulados (mock)
+            </label>
+
+            <button type="submit">Exportar Empresas</button>
+        </form>
+
+        <div id="loading">
+            <div class="spinner"></div> Gerando Excel...
+        </div>
+        <div id="toast"></div>
+        <div id="previewContainer" class="mt-4" style="display: none;">
+            <h4 style="color:#004c99;">Prévia dos resultados</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm table-hover" id="previewTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>CNPJ</th>
+                            <th>Razão Social</th>
+                            <th>UF</th>
+                            <th>Município</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div class="text-end mt-3">
+                    <button type="button" id="btnDownloadExcel" class="btn btn-success" style="display: none;">
+                        Baixar Excel
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleExtra() {
+            const extras = document.getElementById("filtrosExtras");
+            extras.classList.toggle("hidden");
+        }
+
+        const form = document.getElementById("empresaForm");
+        const loading = document.getElementById("loading");
+        const toast = document.getElementById("toast");
+        const previewContainer = document.getElementById("previewContainer");
+        const previewTableBody = document.querySelector("#previewTable tbody");
+
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = isError ? "error" : "";
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => toast.style.display = "none", 500);
+            }, 4000);
+        }
+
+        function preencherTabelaPreview(dados) {
+            previewTableBody.innerHTML = "";
+            dados.slice(0, 10).forEach(emp => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+        <td>${emp.cnpj || '-'}</td>
+        <td>${emp.razao_social || '-'}</td>
+        <td>${emp.uf || '-'}</td>
+        <td>${emp.municipio || '-'}</td>
+      `;
+                previewTableBody.appendChild(row);
+            });
+            previewContainer.style.display = "block";
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            loading.style.display = "flex";
+            previewContainer.style.display = "none";
+            btnDownloadExcel.style.display = "none";
+
+            const params = new URLSearchParams(new FormData(form)).toString();
+
+            try {
+                const response = await fetch("/gerar_excel?" + params);
+                const result = await response.json();
+
+                if (result.status === "sucesso") {
+                    showToast(result.mensagem);
+                    preencherTabelaPreview(result.empresas || []);
+                    btnDownloadExcel.style.display = "inline-block"; // mostra o botão
+                } else {
+                    showToast(result.mensagem, true);
+                }
+            } catch (err) {
+                showToast("Erro ao processar a requisição.", true);
+                console.error(err);
+            } finally {
+                loading.style.display = "none";
+            }
+        });
+        const btnDownloadExcel = document.getElementById("btnDownloadExcel");
+
+        btnDownloadExcel.addEventListener("click", async () => {
+            try {
+                const excel = await fetch("/baixar_excel");
+                const blob = await excel.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "empresas.xlsx";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showToast("Erro ao baixar o Excel.", true);
+                console.error(err);
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
