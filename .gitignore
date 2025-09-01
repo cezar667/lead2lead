@@ -14,7 +14,7 @@ __pycache__/
 Thumbs.db
 
 # --- Dados locais grandes / temporários ---
-data/
+data/cnpj_parquet/**
 scripts/**/parquet/
 **/*.parquet
 **/*.duckdb
@@ -26,7 +26,7 @@ logs/
 **/*.log
 
 # --- Exports gerados ---
-exports/
+exports/**  
 out/
 **/*.csv
 **/*.xlsx
@@ -47,5 +47,5 @@ dist/
 build/
 
 # Re-inclui apenas o .gitkeep de cada pasta
-!data/.gitkeep
+!data/cnpj_parquet/.gitkeep
 !exports/.gitkeep
